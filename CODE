@@ -1,0 +1,53 @@
+import streamlit as st
+
+class FacultyEvaluationSystem:
+    def __init__(self):
+        # Using Streamlit's session state to retain data across interactions
+        if 'evaluations' not in st.session_state:
+            st.session_state.evaluations = {}
+
+    def collect_feedback(self):
+        st.subheader("Provide Feedback")
+
+        # Input Fields
+        course = st.text_input("Enter course name:")
+        instructor = st.text_input("Enter instructor name:")
+        rating = st.slider("Rate (1-5):", min_value=1.0, max_value=5.0, step=0.1)
+
+        # Submit Feedback
+        if st.button("Submit Feedback"):
+            if course and instructor:
+                key = (course, instructor)
+                if key in st.session_state.evaluations:
+                    st.session_state.evaluations[key].append(rating)
+                else:
+                    st.session_state.evaluations[key] = [rating]
+                st.success("Feedback submitted successfully!")
+            else:
+                st.error("Please enter both course name and instructor name.")
+
+    def analyze_feedback(self):
+        st.subheader("Evaluation Results")
+
+        if not st.session_state.evaluations:
+            st.info("No feedback available.")
+            return
+        
+        for (course, instructor), ratings in st.session_state.evaluations.items():
+            avg_rating = sum(ratings) / len(ratings)
+            st.write(f"**Course:** {course} | **Instructor:** {instructor} | **Average Rating:** {avg_rating:.2f}")
+
+    def run(self):
+        st.title("Faculty Evaluation System")
+
+        menu = ["Provide Feedback", "View Evaluation Results"]
+        choice = st.sidebar.selectbox("Menu", menu)
+
+        if choice == "Provide Feedback":
+            self.collect_feedback()
+        elif choice == "View Evaluation Results":
+            self.analyze_feedback()
+
+if __name__ == "__main__":
+    system = FacultyEvaluationSystem()
+    system.run()
